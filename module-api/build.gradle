@@ -1,0 +1,127 @@
+apply plugin: 'com.android.library'
+
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
+group = "cc.suitalk.android"            // Maven Group ID for the artifact，
+
+// 这个version是library的版本，更新后也需要更改这个值
+version = bintrayConfig.version
+archivesBaseName = 'module-api'
+
+android {
+    compileSdkVersion buildConfig.compileSdkVersion
+    buildToolsVersion buildConfig.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion buildConfig.minSdkVersion
+        targetSdkVersion buildConfig.targetSdkVersion
+        versionCode buildConfig.versionCode
+        versionName buildConfig.versionName
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    provided 'com.android.support:appcompat-v7:+'
+    testCompile 'junit:junit:4.12'
+
+    compile project(':module-api-extension')
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+//        repository(url: "file:~/.m2/repository")
+        repository(url: "file:${project.rootDir.getParentFile().getAbsolutePath()}/repositories/release")
+    }
+}
+
+
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                packaging 'jar'
+                // Add your description here
+                name 'A ag-extension for ModuleApi to generate code.'
+                url bintrayConfig.siteUrl
+                // Set your license
+                licenses {
+                    license {
+                        name bintrayConfig.licenseName
+                        url bintrayConfig.licenseUrl
+                    }
+                }
+                developers {
+                    developer {
+                        id bintrayConfig.developerId
+                        name bintrayConfig.developerName
+                        email bintrayConfig.developerEmail
+                    }
+                }
+                scm {
+                    connection bintrayConfig.gitUrl
+                    developerConnection bintrayConfig.gitUrl
+                    url bintrayConfig.siteUrl
+                }
+            }
+        }
+    }
+}
+
+
+task packSourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    options.encoding "UTF-8"
+    options.charSet 'UTF-8'
+    options.author true
+    options.version true
+//    options.links "https://github.com/AlbieLiang/IPCInvoker/tree/master/ipc-invoker/build/docs/javadoc"
+    failOnError false
+}
+
+task packJavadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives packJavadocJar
+    archives packSourcesJar
+}
+
+Properties properties = new Properties()
+File file = project.rootProject.file('bintray-config.properties');
+if (file.isFile()) {
+    properties.load(file.newDataInputStream())
+
+    bintray {
+        user = properties.getProperty("bintray.user")
+        key = properties.getProperty("bintray.apikey")
+        configurations = ['archives']
+        pkg {
+            repo = "maven"          //这个应该是传到maven的仓库的
+            name = archivesBaseName    //发布的项目名字
+            websiteUrl = bintrayConfig.siteUrl
+            vcsUrl = bintrayConfig.gitUrl
+            licenses = ["Apache-2.0"]
+            publish = true
+        }
+    }
+}

@@ -1,0 +1,112 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+apply plugin: 'groovy'
+//apply plugin: 'maven'
+
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
+group = "cc.suitalk.tools"            // Maven Group ID for the artifact，
+
+// 这个version是library的版本，更新后也需要更改这个值
+version = bintrayConfig.version
+archivesBaseName = 'module-api-ag-extension'
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+
+    compile libsDependencies.arbitrarygenSdk
+    compile libsDependencies.arbitrarygen
+    compile libsDependencies.agGradlePlugin
+
+    compile project(':module-api-extension')
+}
+
+// 一定要记得使用交叉编译选项，因为我们可能用很高的JDK版本编译，为了让安装了低版本的同学能用上我们写的插件，必须设定source和target
+compileGroovy {
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
+    options.encoding = "UTF-8"
+}
+
+jar {
+    baseName = archivesBaseName
+    version = this.version
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        repository(url: "file:${project.rootDir.getParentFile().getAbsolutePath()}/repositories/release")
+    }
+}
+
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                packaging 'jar'
+                // Add your description here
+                name 'A code generator gradle plugin for ModuleApi, extends from ArbitraryGen.'     //项目的描述 你可以多写一点
+                url bintrayConfig.siteUrl
+                // Set your license
+                licenses {
+                    license {
+                        name bintrayConfig.licenseName
+                        url bintrayConfig.licenseUrl
+                    }
+                }
+                developers {
+                    developer {
+                        id bintrayConfig.developerId
+                        name bintrayConfig.developerName
+                        email bintrayConfig.developerEmail
+                    }
+                }
+                scm {
+                    connection bintrayConfig.gitUrl
+                    developerConnection bintrayConfig.gitUrl
+                    url bintrayConfig.siteUrl
+                }
+            }
+        }
+    }
+}
+
+task packSourcesJar(type: Jar) {
+//    from android.sourceSets.main.java.srcDirs
+//    from sourceSets.main.allJava
+    from sourceSets.main.groovy.srcDirs
+    classifier = 'sources'
+}
+
+task packGroovydocJar(type: Jar, dependsOn: groovydoc) {
+    classifier = 'groovydoc'
+    from groovydoc.destinationDir
+}
+
+artifacts {
+    archives packGroovydocJar
+    archives packSourcesJar
+}
+
+Properties properties = new Properties()
+File file = project.rootProject.file('bintray-config.properties');
+if (file.isFile()) {
+    properties.load(file.newDataInputStream())
+
+    bintray {
+        user = properties.getProperty("bintray.user")
+        key = properties.getProperty("bintray.apikey")
+        configurations = ['archives']
+        pkg {
+            repo = "maven"          //这个应该是传到maven的仓库的
+            name = archivesBaseName    //发布的项目名字
+            websiteUrl = bintrayConfig.siteUrl
+            vcsUrl = bintrayConfig.gitUrl
+            licenses = ["Apache-2.0"]
+            publish = true
+        }
+    }
+}
