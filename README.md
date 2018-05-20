@@ -2,7 +2,7 @@
 
 [![license](http://img.shields.io/badge/license-Apache2.0-brightgreen.svg?style=flat)](https://github.com/AlbieLiang/ModuleApi/blob/master/LICENSE)
 [![Release Version](https://img.shields.io/badge/release-0.1.0-red.svg)](https://github.com/AlbieLiang/ModuelApi/releases)
-[![wiki](https://img.shields.io/badge/wiki-2.1.0-red.svg)](https://github.com/AlbieLiang/ModuleApi/wiki)
+[![wiki](https://img.shields.io/badge/wiki-0.1.0-red.svg)](https://github.com/AlbieLiang/ModuleApi/wiki)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/AlbieLiang/ModuleApi/pulls)
 
 A across module Calling component for Android development.
