@@ -18,7 +18,7 @@
 
 ext {
     buildConfig = [
-        debug : true,
+        debug : false,
         minSdkVersion : 15,
         targetSdkVersion : 25,
         versionCode : 1,
