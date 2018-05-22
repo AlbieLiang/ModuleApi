@@ -20,7 +20,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        // 添加对[ArbitraryGen](https://github.com/AlbieLiang/ArbitraryGen)的依赖
+        // 添加对ArbitraryGen的依赖
         classpath 'cc.suitalk.tools:arbitrarygen-plugin:2.1.1'
         // 添加对ModuleApi代码生成插件的依赖
         classpath 'cc.suitalk.tools:module-api-ag-extension:0.1.0'
