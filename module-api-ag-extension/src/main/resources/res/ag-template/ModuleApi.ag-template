@@ -14,79 +14,84 @@
  *  limitations under the License.
  *
  */
-
+<% var methodList = [];
+var fieldList = [];
+var shouldImportClassSet = [];
+if (methodSet) {
+    for (var i = 0; i < methodSet.length; i++) {
+        var m = methodSet[i];
+        if (m._annotation.ApiMethod) {
+            if (m._modifier != "public" || m._static) {
+                continue;
+            }
+            var argsStr = "";
+            if (m._args.length > 0) {
+                var arg = m._args[0];
+                argsStr = (arg._type.name) + (arg._type.genericityType ? "<" + arg._type.genericityType.join(", ") + "> " : " ") + arg._name;
+                shouldImportClassSet.push(arg._type.name);
+                for (var a = 1; a < m._args.length; a++) {
+                    arg = m._args[a];
+                    argsStr += ", " + (arg._type.name) + (arg._type.genericityType ? "<" + arg._type.genericityType.join(", ") + "> " : " ") + arg._name;
+                    shouldImportClassSet.push(arg._type.name);
+                    if (arg._type.genericityType) {
+                        Array.prototype.push.apply(shouldImportClassSet, arg._type.genericityType);
+                    }
+                }
+            }
+            methodList.push(m._type + " " + m._name + "(" + argsStr + ")");
+            shouldImportClassSet.push(m._type);
+        } else if (m._annotation.ApiField) {
+            if (m._modifier != "public" && m._static) {
+                continue;
+            }
+            fieldList.push("public static " + (m._final ? "final ": "" ) + m._type + " " + m._name + " = " + m._default);
+            shouldImportClassSet.push(m._type);
+        }
+    }
+}%>
 package <%=fileObject._package%>;
 
-import android.os.Bundle;
-
-import cc.suitalk.moduleapi.extension.annotation.MakeApi;
-import cc.suitalk.moduleapi.extension.annotation.ApiField;
-import cc.suitalk.moduleapi.extension.annotation.ApiMethod;
 import cc.suitalk.moduleapi.extension.Api;
-<% var importedSet = ["cc.suitalk.moduleapi.extension.annotation.ApiMethod",
-                      "cc.suitalk.moduleapi.extension.annotation.ApiField",
-                      "cc.suitalk.moduleapi.extension.annotation.MakeApi",
-                      "cc.suitalk.ipcinvoker.tools.Log"]%>
-<% for (var i = 0; i < fileObject._import.length; i++) {
+<% var importedSet = [];
+var shouldImportSet = [];
+for (var i = 0; i < fileObject._import.length; i++) {
     var _import = fileObject._import[i];
     if (importedSet.indexOf(_import) >= 0) {
         continue;
     }
-    importedSet.push(_import);%>
-import <%=_import%>;
-<%}%>
-<%var _class = fileObject._class[0];%>
-<% if (_class.subClass) {
+    importedSet.push(_import);
+    shouldImportSet.push(_import);
+}
+var _class = fileObject._class[0];
+if (_class.subClass) {
     for (var i = 0; i < _class.subClass.length; i++) {
         var subClass = _class.subClass[i];
         var _import = fileObject._package + "." + _class._name + "." + subClass._name;
         if (subClass._modifier != "public" || !subClass._static || importedSet.indexOf(_import) >= 0) {
             continue;
-        }%>
-import <%=_import%>;
-   <%}
+        }
+        shouldImportSet.push(_import);
+    }
 }%>
+<% for (var i = 0; i < shouldImportSet.length; i++) {
+    var _import = shouldImportSet[i];
+    var typeName = _import.substring(_import.lastIndexOf(".") + 1);
+    if (shouldImportClassSet.indexOf(typeName) < 0) {
+        continue;
+    }
+%>
+import <%=_import%>;
+<%}%>
 /**
- *
  * Created by ArbitraryGen on <%var date = new Date();%><%=date.toLocaleDateString() + " " + date.toLocaleTimeString()%>.
  *
+ * Auto-Generate from the source class : <%=fileObject._package + "."+ _class._name%>
  */
 public interface <%=_class._name%>Api extends Api {
-
-    public static final String TAG = "AG.<%=_class._name%>Api";
-    <% var methodList = [];
-    var fieldList = [];
-    if (methodSet) {
-        for (var i = 0; i < methodSet.length; i++) {
-            var m = methodSet[i];
-            if (m._annotation.ApiMethod) {
-                if (m._modifier != "public" || m._static) {
-                    continue;
-                }
-                var argsStr = "";
-                if (m._args.length > 0) {
-                    var arg = m._args[0];
-                    argsStr = (arg._type.name) + (arg._type.genericityType ? "<" + arg._type.genericityType.join(", ") + "> " : " ") + arg._name;
-                    for (var a = 1; a < m._args.length; a++) {
-                        arg = m._args[a];
-                        argsStr += ", " + (arg._type.name) + (arg._type.genericityType ? "<" + arg._type.genericityType.join(", ") + "> " : " ") + arg._name;
-                    }
-                }
-                methodList.push(m._type + " " + m._name + "(" + argsStr + ")");
-            } else if (m._annotation.ApiField) {
-                if (m._modifier != "public" && m._static) {
-                    continue;
-                }
-                fieldList.push("public static " + (m._final ? "final ": "" ) + m._type + " " + m._name + " = " + m._default);
-            }
-        }
-    }%>
-
     <%for (var i = 0; i < fieldList.length; i++) {
         var field = fieldList[i];%>
     <%=field%>;
     <%}%>
-
     <%for (var i = 0; i < methodList.length; i++) {
         var m = methodList[i];%>
     <%=m%>;

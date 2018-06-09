@@ -75,9 +75,12 @@ class ModuleApiAGExtensionPlugin implements Plugin<Project> {
             File srcDir = this.project.file(moduleApi.srcDir)
             File destDir = this.project.file(moduleApi.destDir)
 
-            if (srcDir == null || !srcDir.exists() || destDir == null || !destDir.exists()) {
+            if (srcDir == null || !srcDir.exists() || destDir == null) {
                 println("project: ${this.project} do not exists moduleApi srcDir or destDir.")
                 return
+            }
+            if (!destDir.exists()) {
+                destDir.mkdirs()
             }
             copyFiles(srcDir, destDir)
         }
@@ -122,8 +125,12 @@ class ModuleApiAGExtensionPlugin implements Plugin<Project> {
         collectFiles(list, srcDir)
         for (File file : list) {
             String path = file.getAbsolutePath()
-            String destPath = path.replaceFirst(srcDir.getAbsolutePath(), destDir.getAbsolutePath())
-                    .replaceAll('^([^\\.]*)\\.api$', '$1.java')
+//            String destPath = path.replaceFirst(srcDir.getAbsolutePath(), destDir.getAbsolutePath())
+//                    .replaceAll('^([^\\.]*)\\.api$', '$1.java')
+            String destPath = (destDir.getAbsolutePath() + path.substring(srcDir.getAbsolutePath().length()))
+            if (destPath.endsWith(".api")) {
+                destPath = destPath.substring(0, destPath.length() - ".api".length()) + ".java"
+            }
             copyFile(file, new File(destPath))
             println("copy file($path) to $destPath")
         }
