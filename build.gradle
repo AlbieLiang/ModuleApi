@@ -6,7 +6,7 @@ buildscript {
         jcenter()
         if (buildConfig.debug) {
             maven {
-                url "file:${project.rootDir.getParentFile().getAbsolutePath()}/repositories/release"
+                url "file:${System.getProperty("user.home")}/.debugMaven/repositories/release"
             }
         }
     }
@@ -28,7 +28,7 @@ allprojects {
         jcenter()
         if (buildConfig.debug) {
             maven {
-                url "file:${project.rootDir.getParentFile().getAbsolutePath()}/repositories/release"
+                url "file:${System.getProperty("user.home")}/.debugMaven/repositories/release"
             }
         }
     }

@@ -40,8 +40,7 @@ dependencies {
 
 uploadArchives {
     repositories.mavenDeployer {
-//        repository(url: "file:~/.m2/repository")
-        repository(url: "file:${project.rootDir.getParentFile().getAbsolutePath()}/repositories/release")
+        repository(url: "file:${System.getProperty("user.home")}/.debugMaven/repositories/release")
     }
 }
 
