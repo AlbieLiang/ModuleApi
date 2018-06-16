@@ -1,0 +1,12 @@
+moduleApi {
+    srcDir "${project.projectDir.absolutePath}/src/main/api"
+    destDir "${project.rootProject.projectDir.absolutePath}/api/src/main/api"
+
+//  makeApiRules "${project.projectDir.absolutePath}/src/main/api/*.api", "${project.projectDir.absolutePath}/src/main/api/*.java"
+    logger {
+        debug true
+        toFile true
+        printTag true
+        path "$buildDir/outputs/logs/ag.log"
+    }
+}

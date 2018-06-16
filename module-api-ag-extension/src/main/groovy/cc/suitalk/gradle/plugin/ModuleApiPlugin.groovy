@@ -30,6 +30,7 @@ import cc.suitalk.arbitrarygen.tools.RuntimeContextHelper
 import cc.suitalk.arbitrarygen.utils.FileOperation
 import cc.suitalk.arbitrarygen.utils.JSONArgsUtils
 import cc.suitalk.arbitrarygen.utils.Log
+import cc.suitalk.arbitrarygen.utils.Util
 import cc.suitalk.moduleapi.ag.extension.ModuleApiAGContextExtension
 import cc.suitalk.moduleapi.ag.extension.ModuleApiTaskProcessor
 import groovy.json.JsonBuilder
@@ -75,45 +76,21 @@ class ModuleApiPlugin implements Plugin<Project> {
 
         extension = project.extensions.create("moduleApi", ModuleApiPluginExtension)
         project.afterEvaluate {
-            def moduleApiClosure = this.project["moduleApi"]
-            if (moduleApiClosure == null) {
-                println("closure moduleApi is null, skip")
-                return
+            JSONObject initArg = getArgsFromExtension(this.project)
+            if (initArg == null) {
+                initArg = getArgsFromConfigFile(this.project)
             }
-            if (moduleApiClosure.srcDir == null || moduleApiClosure.destDir == null) {
-                println("project(${project.name}), moduleApi.srcDir or moduleApi.destDir is null")
-                return
+            if (initArg == null) {
+                initArg = new JSONObject();
+                initArg.put("srcDir", "${this.project.projectDir.absolutePath}/src/main/api".toString())
+                initArg.put("destDir", "${this.project.rootProject.projectDir.absolutePath}/api/src/main/api".toString())
             }
-            JSONObject initArg = new JSONObject();
-            initArg.put("srcDir", (moduleApiClosure.srcDir == null ? "" : moduleApiClosure.srcDir))
-            initArg.put("destDir", (moduleApiClosure.destDir == null ? "" : moduleApiClosure.destDir))
-            initArg.put("templateDir", (moduleApiClosure.templateDir == null ? "" : moduleApiClosure.templateDir))
-            if (extension.makeApiRules != null && extension.makeApiRules.length > 0) {
-                JSONArray jsonArray = new JSONArray();
-                for (String rule : extension.makeApiRules) {
-                    jsonArray.add(rule)
-                }
-                initArg.put("makeApiRules", jsonArray)
-            }
-            if (extension.logger != null) {
-                JsonBuilder jsonBuilder = new JsonBuilder()
-                jsonBuilder {
-                    logger extension.logger
-                }
-                println("ModuleApi : ${jsonBuilder.toString()}")
-                JSONObject loggerJson = JSONObject.fromObject(jsonBuilder.toString())
-                if (!loggerJson.isNullObject() && !loggerJson.isEmpty()) {
-                    initArg.put("logger", loggerJson.get("logger"))
-                }
+            println "moduleApi(${this.project.name}) srcDir : '${initArg.getString("srcDir")}'"
+            println "moduleApi(${this.project.name}) destDir : '${initArg.getString("destDir")}'"
+            println "moduleApi(${this.project.name}) makeApiRules : '${initArg.get("makeApiRules")}'"
 
-            }
-
-            println "moduleApi(${this.project.name}) srcDir : '${moduleApiClosure.srcDir}'"
-            println "moduleApi(${this.project.name}) destDir : '${moduleApiClosure.destDir}'"
-            println "moduleApi(${this.project.name}) makeApiRules : '${moduleApiClosure.makeApiRules}'"
-
-            File srcDir = this.project.file(moduleApiClosure.srcDir)
-            File destDir = this.project.file(moduleApiClosure.destDir)
+            File srcDir = this.project.file(initArg.getString("srcDir"))
+            File destDir = this.project.file(initArg.getString("destDir"))
 
             if (srcDir == null || !srcDir.exists() || destDir == null) {
                 println("project: ${this.project} do not exists moduleApi srcDir or destDir.")
@@ -282,7 +259,68 @@ class ModuleApiPlugin implements Plugin<Project> {
         }
         context.initialize(initArgs);
         context.execute();
+
         Log.close();
+    }
+
+    JSONObject getArgsFromConfigFile(Project project) {
+        String shellCode = FileOperation.read("${project.rootDir.absolutePath}/.config/module-api.ag-conf")
+        if (shellCode == null || shellCode.length() == 0) {
+            println("shellCode is null or nil, config file path : ${project.rootDir.absolutePath}/.config/module-api.ag-conf")
+            return null
+        }
+        Binding binding = new Binding()
+        binding.setProperty("project", project)
+        binding.setProperty("name", project.name)
+        binding.setProperty("rootDir", project.rootDir)
+        binding.setProperty("projectDir", project.projectDir.absolutePath)
+        binding.setProperty("buildDir", project.buildDir.absolutePath)
+
+        GroovyShell groovyShell = new GroovyShell(binding)
+        StringBuilder builder = new StringBuilder()
+        builder.append("import groovy.json.JsonBuilder\n")
+        builder.append("JsonBuilder moduleApi = new JsonBuilder()\n")
+        builder.append(shellCode)
+        builder.append("\n")
+        builder.append("moduleApi.toString()")
+        Object result = groovyShell.evaluate(builder.toString())
+        return JSONObject.fromObject(result.toString())
+    }
+
+    JSONObject getArgsFromExtension(Project project) {
+        def moduleApiClosure = project["moduleApi"]
+        if (moduleApiClosure == null) {
+            println("getArgsFromExtension, closure moduleApi is null, skip")
+            return null
+        }
+        if (moduleApiClosure.srcDir == null || moduleApiClosure.destDir == null) {
+            println("getArgsFromExtension, project(${project.name}), moduleApi.srcDir or moduleApi.destDir is null")
+            return null
+        }
+        JSONObject initArg = new JSONObject();
+        initArg.put("srcDir", (moduleApiClosure.srcDir == null ? "" : moduleApiClosure.srcDir))
+        initArg.put("destDir", (moduleApiClosure.destDir == null ? "" : moduleApiClosure.destDir))
+        initArg.put("templateDir", (moduleApiClosure.templateDir == null ? "" : moduleApiClosure.templateDir))
+        if (moduleApiClosure.makeApiRules != null && moduleApiClosure.makeApiRules.length > 0) {
+            JSONArray jsonArray = new JSONArray();
+            for (String rule : moduleApiClosure.makeApiRules) {
+                jsonArray.add(rule)
+            }
+            initArg.put("makeApiRules", jsonArray)
+        }
+        if (moduleApiClosure.logger != null) {
+            JsonBuilder jsonBuilder = new JsonBuilder()
+            jsonBuilder {
+                logger moduleApiClosure.logger
+            }
+            println("ModuleApi : ${jsonBuilder.toString()}")
+            JSONObject loggerJson = JSONObject.fromObject(jsonBuilder.toString())
+            if (!loggerJson.isNullObject() && !loggerJson.isEmpty()) {
+                initArg.put("logger", loggerJson.get("logger"))
+            }
+
+        }
+        return initArg
     }
 }
 
