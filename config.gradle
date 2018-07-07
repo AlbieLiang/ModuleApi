@@ -18,7 +18,7 @@
 
 ext {
     buildConfig = [
-        debug : true,
+        debug : false,
         minSdkVersion : 15,
         targetSdkVersion : 25,
         versionCode : 1,
@@ -28,7 +28,7 @@ ext {
     ]
 
     bintrayConfig = [
-            version : '0.1.4',
+            version : '0.1.5',
             siteUrl : 'https://github.com/AlbieLiang/ModuleApi',   // 项目的主页
             gitUrl : 'https://github.com/AlbieLiang/ModuleApi.git',   // Git仓库的url
             licenseName : 'The Apache Software License, Version 2.0',
@@ -39,8 +39,8 @@ ext {
     ]
 
     libsDependencies = [
-            arbitrarygen : 'cc.suitalk.tools:arbitrarygen:2.1.2',
-            arbitrarygenSdk : 'cc.suitalk.tools:arbitrarygen-sdk:2.1.2',
-            agGradlePlugin : 'cc.suitalk.tools:arbitrarygen-plugin:2.1.2',
+            arbitrarygen : 'cc.suitalk.tools:arbitrarygen:2.1.5',
+            arbitrarygenSdk : 'cc.suitalk.tools:arbitrarygen-sdk:2.1.5',
+            agGradlePlugin : 'cc.suitalk.tools:arbitrarygen-plugin:2.1.5',
     ]
 }

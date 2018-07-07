@@ -10,6 +10,7 @@ import java.util.Map;
 
 import cc.suitalk.moduleapi.extension.Api;
 import cc.suitalk.moduleapi.extension.annotation.DummyWhenNull;
+import cc.suitalk.moduleapi.extension.annotation.InjectClass;
 
 /**
  * Created by albieliang on 2018/2/6.
@@ -24,6 +25,13 @@ public class ModuleApi {
     public static <T extends Api> T get(@NonNull Class<T> tClass) {
         Assert.assertNotNull(tClass);
         Object o = sMap.get(tClass);
+        InjectClass injectClass = null;
+        if (o == null && (injectClass = tClass.getAnnotation(InjectClass.class)) != null) {
+            o = ReflectUtils.newInstance(injectClass.value());
+            if (o != null) {
+                set(tClass, o);
+            }
+        }
         if (o == null && tClass.getAnnotation(DummyWhenNull.class) != null) {
             return DummyObject.newInstance(tClass);
         }

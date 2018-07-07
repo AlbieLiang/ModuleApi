@@ -51,6 +51,7 @@ if (methodSet) {
 }%>
 package <%=fileObject._package%>;
 
+import cc.suitalk.moduleapi.extension.annotation.InjectClass;
 import cc.suitalk.moduleapi.extension.Api;
 <% var importedSet = [];
 var shouldImportSet = [];
@@ -87,6 +88,9 @@ import <%=_import%>;
  *
  * Auto-Generate from the source class : <%=fileObject._package + "."+ _class._name%>
  */
+ <%if (_class._annotation && _class._annotation.Autowire) {%>
+@InjectClass("<%=fileObject._package + "."+ _class._name%>")<%
+ }%>
 public interface <%=_class._name%>Api extends Api {
     <%for (var i = 0; i < fieldList.length; i++) {
         var field = fieldList[i];%>

@@ -1,8 +1,8 @@
 # ModuleApi
 
 [![license](http://img.shields.io/badge/license-Apache2.0-brightgreen.svg?style=flat)](https://github.com/AlbieLiang/ModuleApi/blob/master/LICENSE)
-[![Release Version](https://img.shields.io/badge/release-0.1.0-red.svg)](https://github.com/AlbieLiang/ModuelApi/releases)
-[![wiki](https://img.shields.io/badge/wiki-0.1.0-red.svg)](https://github.com/AlbieLiang/ModuleApi/wiki)
+[![Release Version](https://img.shields.io/badge/release-0.1.5-red.svg)](https://github.com/AlbieLiang/ModuelApi/releases)
+[![wiki](https://img.shields.io/badge/wiki-0.1.5-red.svg)](https://github.com/AlbieLiang/ModuleApi/wiki)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/AlbieLiang/ModuleApi/pulls)
 
 A across module Calling component for Android development.
@@ -14,45 +14,34 @@ ModuleApi是一个用于解决Android模块化后，跨模块调用的组件。M
 
 在工程的build.gradle中添加依赖
 
-```gradle
+```groovy
 buildscript {
     repositories {
         jcenter()
     }
     dependencies {
-        // 添加对ArbitraryGen的依赖
-        classpath 'cc.suitalk.tools:arbitrarygen-plugin:2.1.1'
         // 添加对ModuleApi代码生成插件的依赖
-        classpath 'cc.suitalk.tools:module-api-ag-extension:0.1.0'
-        ...
+        classpath 'cc.suitalk.tools:module-api-ag-extension:0.1.5'
     }
 }
 ```
 
 在使用ModuleApi的module的build.gradle中添加依赖和配置
 
-```gralde
-apply plugin: 'module-api-ag-extension'
-apply plugin: 'arbitrarygen'
+```groovy
+apply plugin: 'module-api'
 
 dependencies {
-    compile 'cc.suitalk.android:module-api:0.1.0'
-    ...
+    compile 'cc.suitalk.android:module-api:0.1.5'
 }
 
-arbitraryGen {
-    templateDir "${project.rootDir.getAbsolutePath()}/ag-template"
-    srcDir "${project.projectDir.absolutePath}/ag-datasrc"
-    destDir "$buildDir/generated/source/ag-gen"
+moduleApi {
+    // 配置扫描api目录
+    srcDir "${project.projectDir.absolutePath}/src/main/api"
+    // 配置生成api的目标目录
+    destDir "${project.rootProject.projectDir.absolutePath}/api/src/main/api"
 
-    ext {
-        moduleApi {
-            // 配置扫描api目录
-            srcDir "${project.projectDir.absolutePath}/src/main/java"
-            // 配置生成api的目标目录
-            destDir "${project.rootProject.projectDir.absolutePath}/api/build/generated/source/ag-gen"
-        }
-    }
+    makeApiRules "${project.projectDir.absolutePath}/src/main/api/*.java"
 }
 ```
 ## 定义api
@@ -116,6 +105,15 @@ ModuleApi.set(ModuleBModelApi.class, new ModuleBModel());
 
 ```java
 ModuleApi.get(ModuleBModelApi.class).showToast(ModuleBModelApi.STYLE_RED, "Test from ModuleFirst.");
+```
+## 代码混淆
+
+如果你使用到自动装配功能，则需要添加proguard规则
+```proguard
+
+# Keep ModuleApi Autowire class
+-keep,allowobfuscation @interface cc.suitalk.moduleapi.extension.annotation.Autowire
+-keep @cc.suitalk.moduleapi.extension.annotation.Autowire class *
 ```
 
 ## License
