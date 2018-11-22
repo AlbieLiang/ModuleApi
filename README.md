@@ -1,8 +1,8 @@
 # ModuleApi
 
 [![license](http://img.shields.io/badge/license-Apache2.0-brightgreen.svg?style=flat)](https://github.com/AlbieLiang/ModuleApi/blob/master/LICENSE)
-[![Release Version](https://img.shields.io/badge/release-0.1.5-red.svg)](https://github.com/AlbieLiang/ModuelApi/releases)
-[![wiki](https://img.shields.io/badge/wiki-0.1.5-red.svg)](https://github.com/AlbieLiang/ModuleApi/wiki)
+[![Release Version](https://img.shields.io/badge/release-0.1.6-red.svg)](https://github.com/AlbieLiang/ModuelApi/releases)
+[![wiki](https://img.shields.io/badge/wiki-0.1.6-red.svg)](https://github.com/AlbieLiang/ModuleApi/wiki)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/AlbieLiang/ModuleApi/pulls)
 
 A across module Calling component for Android development.
@@ -21,7 +21,7 @@ buildscript {
     }
     dependencies {
         // 添加对ModuleApi代码生成插件的依赖
-        classpath 'cc.suitalk.tools:module-api-ag-extension:0.1.5'
+        classpath 'cc.suitalk.tools:module-api-ag-extension:<last-version>'
     }
 }
 ```
@@ -32,7 +32,7 @@ buildscript {
 apply plugin: 'module-api'
 
 dependencies {
-    compile 'cc.suitalk.android:module-api:0.1.5'
+    compile 'cc.suitalk.android:module-api:<last-version>'
 }
 
 moduleApi {
