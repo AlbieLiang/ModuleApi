@@ -3,19 +3,20 @@ buildscript {
     apply from : "config.gradle"
 
     repositories {
-        jcenter()
         if (buildConfig.debug) {
             maven {
                 url "file:${System.getProperty("user.home")}/.debugMaven/repositories/release"
             }
         }
+        jcenter()
+        google();
     }
     dependencies {
 //        classpath 'com.android.tools.build:gradle:3.0.1'
-        classpath 'com.android.tools.build:gradle:2.2.2'
+        classpath 'com.android.tools.build:gradle:3.2.1'
 
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6'
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.4.1'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -25,12 +26,13 @@ buildscript {
 allprojects {
     apply from : "$rootDir/config.gradle"
     repositories {
-        jcenter()
         if (buildConfig.debug) {
             maven {
                 url "file:${System.getProperty("user.home")}/.debugMaven/repositories/release"
             }
         }
+        jcenter()
+        google();
     }
 }
 
