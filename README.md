@@ -106,6 +106,39 @@ ModuleApi.set(ModuleBModelApi.class, new ModuleBModel());
 ```java
 ModuleApi.get(ModuleBModelApi.class).showToast(ModuleBModelApi.STYLE_RED, "Test from ModuleFirst.");
 ```
+## 便捷的功能
+
+### 通过@Autowire标记Api为自动装配接口
+
+若Api（假设为XxxApi）不依赖于任何时机相关的代码逻辑，你可以在该Api的class定义上加上@Autowire标记即可无需手动调用`ModuleApi.set(XxxApi.class, new XxxApiImpl())`函数来设置Api实现，在你第一次调用`ModuleApi.get(XxxApi.class)`时框架将会自动为你构造一个XxxApiImpl实例对象存储到Api管理器中，并且将其返还.
+
+
+实例如下：
+```java
+@Autowire
+@MakeApi
+public class XxxApiImpl implements XxxApi {
+    @ApiMethod
+    public void invoke() {
+    }
+}
+```
+
+### 通过@DummyWhenNull标记Api实现为空是返回一个Dummy对象
+
+若Api（假设为XxxApi）依赖于某些逻辑的时机来设置具体的接口实例，但是希望在没有调用`ModuleApi.set(XxxApi.class, new XxxApiImpl())`的情况下，调用`ModuleApi.get(XxxApi.class)`也不返回null，则可以通过@DummyWhenNull来标记该Api.
+
+实例如下：
+```java
+@DummyWhenNull
+@MakeApi
+public class XxxApiImpl implements XxxApi {
+    @ApiMethod
+    public void invoke() {
+    }
+}
+```
+
 ## 代码混淆
 
 如果你使用到自动装配功能，则需要添加proguard规则
